@@ -17,7 +17,7 @@
       <div class="top">
         <div
           v-for="(item, index) in navList"
-          :key="item"
+          :key="index"
           class="nav"
           :class="{ selected: index == selectedNavIndex }"
           @click="changeSize(item, index)"
@@ -25,53 +25,66 @@
           {{ item.colNum + "X" + item.rowNum }}
         </div>
       </div>
-      <div class="main">
+      <scroll
+        class="main"
+        :barWrapHeight="selectImageData.length"
+        :windowHeight="imageLength"
+        :barTopHeight="startIndex"
+        @prev="changeImgStartIndex('up')"
+        @next="changeImgStartIndex('down')"
+      >
         <image-item
           v-for="img in imgList"
           :key="img.id"
           class="img"
           :img="img"
           :image-size="imageSize"
-          :imgLength="imageLength"
-          :imgList="childImgList"
-          @click.native="selectImageItem(img)"
-          :selected="img.id == selectedImgId"
+          :image-length="imageLength"
+          :image-data="selectImageData"
+          :selected="img.selected"
+          @click="selectImageItem(img)"
         ></image-item>
-      </div>
+      </scroll>
     </div>
-    <!-- <img alt="Vue logo" src="./assets/logo.png"> -->
   </div>
 </template>
 
 <script>
 import ImageItem from "./components/ImageItem.vue";
+import Scroll from "./components/Scroll.vue";
+
 import imageData from "./mockData";
 export default {
   name: "App",
   components: {
-    ImageItem
+    ImageItem,
+    Scroll
   },
   data() {
     return {
-      imageData,
-      selectedImageDataIndex: 0,
+      imageData, // 图片数据
+      selectedImageDataIndex: 0, // 选中的图片数据index
+      // 导航
       navList: [
         {
-          colNum: 2,
-          rowNum: 2
+          colNum: 2, // 列数
+          rowNum: 2 // 行数
         },
         {
           colNum: 2,
           rowNum: 3
+        },
+        {
+          colNum: 3,
+          rowNum: 4
+        },
+        {
+          colNum: 4,
+          rowNum: 4
         }
       ],
-      selectedNavIndex: 0,
-      startIndex: 0,
-      imageLength: 4,
-
-      selectedImgId: 0,
-      imgList: [],
-      childImgList: []
+      selectedNavIndex: 0, // 选中的导航 index
+      startIndex: 0 // 开始的index
     };
   },
   computed: {
@@ -84,87 +97,58 @@ export default {
         height
       };
     },
-    showImageLength() {
+    imageLength() {
       let selectedNav = this.navList[this.selectedNavIndex];
       return selectedNav.colNum * selectedNav.rowNum;
+    },
+    selectImageData() {
+      return this.imageData[this.selectedImageDataIndex];
+    },
+    imgList() {
+      return this.selectImageData.slice(
+        this.startIndex,
+        this.startIndex + this.imageLength
+      );
     }
   },
-  mounted() {
-    this.initImageList();
-  },
   methods: {
-    initImageList() {
-      const selectImgData = this.imageData[this.selectedImageDataIndex];
-      console.log(selectImgData);
-      this.imgList = selectImgData.slice(
-        this.startIndex,
-        this.startIndex + this.showImageLength
-      );
-    },
     changeImgData(index) {
       this.selectedImageDataIndex = index;
-      this.initImageList();
-      this.initChildImageList();
+      this.startIndex = 0;
     },
     changeSize(item, selectedNavIndex) {
       this.selectedNavIndex = selectedNavIndex;
-      this.startIndex = 0;
-      this.initImageList();
-
-      for (let index = 0; index < this.imgList.length; index += 1) {
-        const img = this.imgList[index];
-        img.width = item.width;
-        img.height = item.height;
-      }
-      this.initChildImageList();
     },
     changeImgStartIndex(type) {
       let newIndex = 0;
       if (type === "up") {
-        newIndex = this.startIndex - this.showImageLength;
+        newIndex = this.startIndex - this.imageLength;
       }
 
       if (type === "down") {
-        newIndex = this.startIndex + this.showImageLength;
+        newIndex = this.startIndex + this.imageLength;
       }
-      console.log(newIndex);
-      if (newIndex < 0 || newIndex > 100) {
+      if (newIndex < 0 || newIndex > this.selectImageData.length) {
         return;
       }
       this.startIndex = newIndex;
-      console.log("this.startIndex", this.startIndex);
-      this.initImageList();
     },
-    selectImageItem(img) {
-      this.selectedImgId = img.id;
-      console.log(this.selectedImgId);
-      this.initChildImageList();
-    },
-    initChildImageList() {
-      const selectImgData = this.imageData[this.selectedImageDataIndex];
-      this.childImgList = selectImgData;
-
-      const selectedNav = this.navList[this.selectedNavIndex];
-      for (let index = 0; index < this.childImgList.length; index += 1) {
-        const img = this.childImgList[index];
-        img.width = selectedNav.width;
-        img.height = selectedNav.height;
-      }
+    selectImageItem(imgItem) {
+      imgItem.selected = !imgItem.selected;
     }
   }
 };
 </script>
 
-<style>
+<style lang="less">
 html,
 body {
   padding: 0;
   margin: 0;
-  height: 100vh;
 }
 #app {
   display: flex;
-  height: 100%;
+  height: 100vh;
 }
 .left {
   width: 200px;
@@ -172,13 +156,14 @@ body {
   background: green;
   padding: 20px;
   box-sizing: border-box;
+  .btn {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 10px;
+    border: 1px solid;
+  }
 }
-.btn {
-  width: 20px;
-  height: 20px;
-  margin-bottom: 10px;
-  border: 1px solid;
-}
+
 .selected {
   color: red;
 }
@@ -187,28 +172,26 @@ body {
   flex-direction: column;
   display: flex;
   height: 100%;
-}
-.top {
-  padding: 20px;
-  height: 50px;
-  background: blue;
-}
-.nav {
-  width: 40px;
-  height: 20px;
-  margin-right: 10px;
-  border: 1px solid;
-  display: inline-block;
-}
-.main {
-  height: 0;
-  flex: 1;
-  background: red;
-}
-.img {
-  color: red;
-  float: left;
-  background-size: cover;
-  background-repeat: no-repeat;
+  .top {
+    padding: 20px;
+    height: 50px;
+    background: blue;
+    .nav {
+      width: 40px;
+      height: 20px;
+      margin-right: 10px;
+      border: 1px solid;
+      display: inline-block;
+    }
+  }
+  .main {
+    height: 0;
+    flex: 1;
+    .img {
+      float: left;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+  }
 }
 </style>

@@ -10,7 +10,8 @@ imgArr.forEach(imgUrl => {
   for (let index = 0; index < 100; index++) {
     data.push({
       id: index + 1,
-      url: imgUrl
+      url: imgUrl,
+      selected: false
     });
   }
   imageData.push(data);

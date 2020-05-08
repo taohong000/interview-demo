@@ -3,97 +3,107 @@
     class="wrap"
     :style="{
       width: imageSize.width + '%',
-      height: imageSize.height + '%',
-      backgroundImage: 'url(' + img.url + ')'
+      height: imageSize.height + '%'
     }"
-    :class="{ selected: selected }"
   >
-    <div class="value">{{ img.id }}</div>
-    <div class="up" @click="changeImgStartIndex('up')">向上</div>
-    <div class="down" @click="changeImgStartIndex('down')">向下</div>
-    <template v-if="imgList.length > 0 && selected">
+    <scroll
+      v-if="selected"
+      :barWrapHeight="imageData.length"
+      :windowHeight="imageLength"
+      :barTopHeight="startIndex"
+      @prev="changeImgStartIndex('up')"
+      @next="changeImgStartIndex('down')"
+      @click="onClick"
+    >
       <div
         v-for="img in list"
         :key="img.id"
         class="img"
         :style="{
-          width: img.width + '%',
-          height: img.height + '%',
+          width: imageSize.width + '%',
+          height: imageSize.height + '%',
           backgroundImage: 'url(' + img.url + ')'
         }"
       >
         {{ img.id }}
       </div>
-    </template>
+    </scroll>
+    <div v-else class="image-wrap" @click="onClick">
+      <img :src="img.url" />
+      <div class="value">{{ img.id }}</div>
+    </div>
   </div>
 </template>
 
 <script>
+import Scroll from "./Scroll.vue";
 export default {
+  components: {
+    Scroll
+  },
   props: {
-    selected: Boolean,
-    img: Object,
-    imageSize: Object,
-    imgList: Array,
-    imgLength: {
-      type: Number,
-      default: 4
-    }
+    selected: Boolean, // 是否选中
+    img: Object, // 图片对象
+    imageSize: Object, // 图像尺寸
+    imageData: Array, // 图片数据
+    imageLength: Number // 显示图片长度
   },
   computed: {
     list() {
-      return this.imgList.slice(
+      return this.imageData.slice(
         this.startIndex,
-        this.startIndex + this.imgLength
+        this.startIndex + this.imageLength
       );
     }
   },
   data() {
     return {
-      startIndex: 0
+      startIndex: 0 // 开始的index
     };
   },
-  mounted() {},
   methods: {
     changeImgStartIndex(type) {
       let newIndex = 0;
       if (type === "up") {
-        newIndex = this.startIndex - this.imgLength;
+        newIndex = this.startIndex - this.imageLength;
       }
 
       if (type === "down") {
-        newIndex = this.startIndex + this.imgLength;
+        newIndex = this.startIndex + this.imageLength;
       }
-      if (newIndex < 0 || newIndex > 100) {
+      if (newIndex < 0 || newIndex > this.imageData.length) {
         return;
       }
       this.startIndex = newIndex;
+    },
+    onClick() {
+      this.$emit("click");
+    }
+  },
+  watch: {
+    imageData() {
+      this.startIndex = 0;
     }
   }
 };
 </script>
 
-<style>
+<style lang="less">
 .wrap {
   position: relative;
-}
-.value {
-  top: 10px;
-  left: 10px;
-  position: absolute;
-}
-.img.selected {
-  color: blue;
-}
-.wrap .up {
-  top: 30px;
-  left: 10px;
-  position: absolute;
-}
-
-.wrap .down {
-  top: 50px;
-  left: 10px;
-  position: absolute;
+  .image-wrap {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    .value {
+      top: 10px;
+      left: 10px;
+      position: absolute;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+    }
+  }
 }
 </style>

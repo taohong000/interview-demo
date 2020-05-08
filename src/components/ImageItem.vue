@@ -62,6 +62,7 @@ export default {
     };
   },
   methods: {
+    // 改变展示图像
     changeImgStartIndex(type) {
       let newIndex = 0;
       if (type === "up") {
@@ -76,12 +77,14 @@ export default {
       }
       this.startIndex = newIndex;
     },
+    // 点击事件
     onClick() {
       this.$emit("click");
     }
   },
   watch: {
     imageData() {
+      // 重置图片开始index
       this.startIndex = 0;
     }
   }

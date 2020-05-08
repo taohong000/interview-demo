@@ -24,9 +24,9 @@
 <script>
 export default {
   props: {
-    barWrapHeight: Number,
-    windowHeight: Number,
-    barTopHeight: Number
+    barWrapHeight: Number, // 导航条外框长度
+    windowHeight: Number, // 一页的长度
+    barTopHeight: Number // 导航条距离顶部的长度
   },
   data() {
     return {
@@ -91,7 +91,6 @@ export default {
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="less" scoped>
 .scroll {
   height: 100%;

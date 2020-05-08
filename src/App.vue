@@ -88,6 +88,7 @@ export default {
     };
   },
   computed: {
+    // 图像尺寸
     imageSize() {
       let selectedNav = this.navList[this.selectedNavIndex];
       let width = 100 / selectedNav.colNum;
@@ -97,13 +98,16 @@ export default {
         height
       };
     },
+    // 一页展示图像个数
     imageLength() {
       let selectedNav = this.navList[this.selectedNavIndex];
       return selectedNav.colNum * selectedNav.rowNum;
     },
+    // 选中的图像数据
     selectImageData() {
       return this.imageData[this.selectedImageDataIndex];
     },
+    // 展示的图像
     imgList() {
       return this.selectImageData.slice(
         this.startIndex,
@@ -112,13 +116,16 @@ export default {
     }
   },
   methods: {
+    // 切换图像数据
     changeImgData(index) {
       this.selectedImageDataIndex = index;
       this.startIndex = 0;
     },
+    // 改变尺寸
     changeSize(item, selectedNavIndex) {
       this.selectedNavIndex = selectedNavIndex;
     },
+    // 切换图像
     changeImgStartIndex(type) {
       let newIndex = 0;
       if (type === "up") {
@@ -133,6 +140,7 @@ export default {
       }
       this.startIndex = newIndex;
     },
+    // 选中图像
     selectImageItem(imgItem) {
       imgItem.selected = !imgItem.selected;
     }
